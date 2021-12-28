@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import MainScreen from "../../Components/MainScreen/MainScreen";
 import {
   Badge,
@@ -7,8 +7,8 @@ import {
   Accordion,
   useAccordionButton,
 } from "react-bootstrap";
-import notes from "../../data/notes";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 function CustomToggle({ children, eventKey }) {
   const decoratedOnClick = useAccordionButton(eventKey, () =>
@@ -26,11 +26,22 @@ function CustomToggle({ children, eventKey }) {
   );
 }
 function MyBlog() {
+  const [blogs, setBlog] = useState([]);
   const deleteHandler = (id) => {
     console.log(id);
     if (window.confirm("Are Your Sure?")) {
     }
   };
+
+  const fetchBlog = async () => {
+    const { data } = await axios.get("/api/notes");
+    setBlog(data);
+  };
+  console.log(blogs);
+
+  useEffect(() => {
+    fetchBlog();
+  }, []);
   return (
     <MainScreen title="Welcome To Pranav Verma">
       <Link to="createnote">
@@ -39,11 +50,10 @@ function MyBlog() {
         </Button>
       </Link>
 
-      {notes.map((note) => {
-        console.log(note);
+      {blogs.map((blog) => {
         return (
-          <Accordion>
-            <Card key={note._id} style={{ margin: 10 }}>
+          <Accordion key={blog._id}>
+            <Card key={blog._id} style={{ margin: 10 }}>
               <Card.Header style={{ display: "flex" }}>
                 <span
                   style={{
@@ -55,17 +65,17 @@ function MyBlog() {
                   }}
                 >
                   <CustomToggle as={Card.Text} variant="link" eventKey="0">
-                    {note.title}
+                    {blog.title}
                   </CustomToggle>
                 </span>
                 <div>
-                  <Button Link to={`/note/${note._id}`}>
+                  <Button Link to={`/blog/${blog._id}`}>
                     Edit
                   </Button>
                   <Button
                     variant="danger"
                     className="mx-2"
-                    onClick={() => deleteHandler(note._id)}
+                    onClick={() => deleteHandler(blog._id)}
                   >
                     Delete
                   </Button>
@@ -74,10 +84,10 @@ function MyBlog() {
               <Accordion.Collapse eventKey="0">
                 <Card.Body>
                   <h4>
-                    <Badge bg="success">Category-{note.category}</Badge>
+                    <Badge bg="success">Category-{blog.category}</Badge>
                   </h4>
                   <blockquote className="blockquote mb-0">
-                    <p>{note.content}</p>
+                    <p>{blog.content}</p>
                     <footer className="blockquote-footer">
                       Created On -date
                     </footer>
